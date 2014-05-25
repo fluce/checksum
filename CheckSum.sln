@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E218A85E-6129-41DF-81F3-314919A632C9}"
 	ProjectSection(SolutionItems) = preProject
 		CheckSum\AssemblyDependencies.dgml = CheckSum\AssemblyDependencies.dgml
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{77FF3DA1-3AB9-4AD8-895F-5F740634664B}"
