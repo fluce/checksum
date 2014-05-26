@@ -7,7 +7,8 @@
 
 ### Parameters details ###
 
-| ------------------------------ |---------------------------------------------------------------------|
+| Parameter                      | Description                                                         |
+|--------------------------------|---------------------------------------------------------------------|
 | -m, --Mode                     | (Default: Check) Run mode (Create,Check,Clear)                      |
 | --Create                       | Create checksum files. Existing checksum files are replaced.        |
 | --Check                        |  Check existing checksum files                                      |
@@ -28,4 +29,3 @@
 * 0 : Success
 * 1 : Error
 * 2 : Check failed
-
