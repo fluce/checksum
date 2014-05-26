@@ -1,27 +1,44 @@
 # Checksum #
 
-### What is this repository for? ###
+### Usage ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* CheckSum --Create -p PackagePath
+* CheckSum --Check -p PackagePath
 
-### How do I get set up? ###
+### Parameters details ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+|                                |                                                                     |
+| ------------------------------ | ------------------------------------------------------------------- |
+| -m, --Mode                     | (Default: Check) Run mode (Create,Check,Clear)                      |
+| --Create                       | Create checksum files. Existing checksum files are replaced.        |
 
-### Contribution guidelines ###
+  --Check                           Check existing checksum files
 
-* Writing tests
-* Code review
-* Other guidelines
+  --Clear                           Remove checksum files
 
-### Who do I talk to? ###
+  -p, --PackagePath                 (Default: .) Path to package directory
 
-* Repo owner or admin
-* Other community or team contact
+  --ChecksumInCurrentDirectory      (Default: False) Checksum files are located in current directory
+
+  -d, --DetailedChecksumFileName    (Default: checksum_detailed.txt) Detailed checksum file
+
+  -g, --GlobalChecksumFileName      (Default: checksum.txt) Global checksum file
+
+  -v, --Verbosity                   (Default: Normal) Output verbosity (Silent,Terse,Normal,Verbose)
+
+  -t, --PackageType                 (Default: ZipAndPatch) Package type (ZipAndPatch,FullDirectory)
+
+  -a, --Algorithm                   (Default: MD5) Algorithm name (MD5, SHA1, SHA256...)
+
+  --HideProgress                    Do not display progress details
+
+  --DegreeOfParallelism             (Default: ) Use n CPU for hash calculation 
+
+  --help                            Display this help screen.
+
+
+Return value :
+	0 : Success
+	1 : Error
+	2 : Check failed
+
