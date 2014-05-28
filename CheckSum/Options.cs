@@ -88,6 +88,7 @@ namespace CheckSum
             };
             help.AddPreOptionsLine("Usage: CheckSum --Create -p PackagePath\r\n       CheckSum --Check -p PackagePath");
             help.AddOptions(this);
+            help.AddPostOptionsLine("Return value :\r\n\t0 : Success\r\n\t1 : Error\r\n\t2 : Check failed\r\n\r\n");
             return help;
         }
 

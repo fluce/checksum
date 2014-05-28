@@ -1,4 +1,5 @@
-﻿using CheckSum.CheckSum;
+﻿using System;
+using CheckSum.CheckSum;
 using CheckSum.Helpers;
 using CheckSum.ListBuilder;
 using System.Globalization;
@@ -10,49 +11,67 @@ namespace CheckSum
 {
     public class Program
     {
+        private struct Return
+        {
+            public const int Success = 0;
+            public const int Error = 1;
+            public const int CheckFailed = 2;
+        }
+
+
         public static int Main(string[] args)
         {
-            var options = new Options();
-            using (var parser=new CommandLine.Parser(with =>
+            try
             {
-                with.CaseSensitive = false;
-                with.MutuallyExclusive = true;
-                with.HelpWriter = Logger.ErrorTextWriter;
-                with.ParsingCulture = CultureInfo.InvariantCulture;
-            }))
-                if (parser.ParseArguments(args, options))
+
+                var options = new Options();
+                using (var parser = new CommandLine.Parser(with =>
                 {
-                    if (options.Create) options.Mode = RunMode.Create;
-                    if (options.Check) options.Mode = RunMode.Check;
-                    if (options.Clear) options.Mode = RunMode.Clear;
-
-                    if (!options.HideProgress)
-                        ProgressManager.Current.ProgressUpdated += ProgressManager.RenderProgressToConsole;
-                    if (!Directory.Exists(options.PackagePath))
+                    with.CaseSensitive = false;
+                    with.MutuallyExclusive = true;
+                    with.HelpWriter = Logger.ErrorTextWriter;
+                    with.ParsingCulture = CultureInfo.InvariantCulture;
+                }))
+                    if (parser.ParseArguments(args, options))
                     {
-                        Logger.Error("Package path not found ({0})", options.ResolvedPackagePath);
-                        return 0;
-                    }
+                        if (options.Create) options.Mode = RunMode.Create;
+                        if (options.Check) options.Mode = RunMode.Check;
+                        if (options.Clear) options.Mode = RunMode.Clear;
 
-                    var checker = new CheckSumChecker(GetListBuilder(options.PackageType), GetCheckSumCalculator(options.Algorithm));
-                    switch (options.Mode)
-                    {
-                        case RunMode.Create:
-                            return CreateCheckSum(checker, options);
-                        case RunMode.Check:
-                            return CheckCheckSum(checker, options);
-                        case RunMode.Clear:
-                            File.Delete(options.ResolvedDetailedChecksumFileName);
-                            File.Delete(options.ResolvedGlobalChecksumFileName);
-                            break;
+                        if (!options.HideProgress)
+                            ProgressManager.Current.ProgressUpdated += ProgressManager.RenderProgressToConsole;
+                        if (!Directory.Exists(options.PackagePath))
+                        {
+                            Logger.Error("Package path not found ({0})", options.ResolvedPackagePath);
+                            return Return.Error;
+                        }
+
+                        var checker = new CheckSumChecker(GetListBuilder(options.PackageType),
+                            GetCheckSumCalculator(options.Algorithm));
+                        switch (options.Mode)
+                        {
+                            case RunMode.Create:
+                                return CreateCheckSum(checker, options);
+                            case RunMode.Check:
+                                return CheckCheckSum(checker, options);
+                            case RunMode.Clear:
+                                File.Delete(options.ResolvedDetailedChecksumFileName);
+                                File.Delete(options.ResolvedGlobalChecksumFileName);
+                                return Return.Success;
+                        }
                     }
-                }
-            return 0;
+                return Return.Error;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Exception {0} : {1}", e.GetType().Name, e.Message);
+                return Return.Error;
+            }
         }
 
         private static CheckSumCalculator GetCheckSumCalculator(string algorithm)
         {
-            return new CheckSumCalculator(()=>HashAlgorithm.Create(algorithm));
+            return new CheckSumCalculator(() => HashAlgorithm.Create(algorithm));
         }
 
         private static int CheckCheckSum(CheckSumChecker checker, Options options)
@@ -62,7 +81,7 @@ namespace CheckSum
             {
                 Logger.Error(Resource.Error_Missing_checksum_files);
                 Logger.Info(options.GetUsage());
-                return 0;
+                return Return.Error;
             }
             if (options.Verbosity > Verbosity.Silent)
             {
@@ -88,22 +107,25 @@ namespace CheckSum
                         switch (detailedHashValue.HashMatch)
                         {
                             case CheckSumChecker.HashMatch.Same:
-                                Logger.ResultSuccess(string.Format(" {0}: ", detailedHashValue.FileName), "{0}", detailedHashValue.HashMatch);
+                                Logger.ResultSuccess(string.Format(" {0}: ", detailedHashValue.FileName), "{0}",
+                                    detailedHashValue.HashMatch);
                                 break;
                             case CheckSumChecker.HashMatch.Unexpected:
-                                Logger.ResultWarning(string.Format(" {0}: ", detailedHashValue.FileName), "{0}", detailedHashValue.HashMatch);
+                                Logger.ResultWarning(string.Format(" {0}: ", detailedHashValue.FileName), "{0}",
+                                    detailedHashValue.HashMatch);
                                 break;
                             case CheckSumChecker.HashMatch.Missing:
                             case CheckSumChecker.HashMatch.Different:
-                                Logger.ResultFailure(string.Format(" {0}: ", detailedHashValue.FileName), "{0}", detailedHashValue.HashMatch);
+                                Logger.ResultFailure(string.Format(" {0}: ", detailedHashValue.FileName), "{0}",
+                                    detailedHashValue.HashMatch);
                                 break;
                         }
                     }
                 }
             }
             if (chres.GlobalCheck)
-                return 1;
-            return 0;
+                return Return.Success;
+            return Return.CheckFailed;
         }
 
         private static int CreateCheckSum(CheckSumChecker checker, Options options)
@@ -121,15 +143,17 @@ namespace CheckSum
                         detailedHashValue.Hash);
                 }
             }
-            return 1;
+            return Return.Success;
         }
 
         private static IFileListBuilder GetListBuilder(PackageType packageType)
         {
             switch (packageType)
             {
-                    case PackageType.FullDirectory:return new FullDirectoryListBuilder();
-                    case PackageType.ZipAndPatch:return new ZipAndPatchListBuilder();
+                case PackageType.FullDirectory:
+                    return new FullDirectoryListBuilder();
+                case PackageType.ZipAndPatch:
+                    return new ZipAndPatchListBuilder();
             }
             return null;
         }

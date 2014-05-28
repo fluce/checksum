@@ -261,7 +261,7 @@ namespace CheckSumTest
 
             var ret=Program.Main(new[] {"--Create", "-v", "Verbose"});
 
-            Assert.AreEqual(1, ret);
+            Assert.AreEqual(0, ret);
 
             Console.Out.WriteLine("checksum_detailed :");
             Console.Out.WriteLine(File.ReadAllText(options.DetailedChecksumFileName));
@@ -281,7 +281,7 @@ namespace CheckSumTest
 
             var ret = Program.Main(new[] {"--Help"});
 
-            Assert.AreEqual(0, ret);
+            Assert.AreEqual(1, ret);
 
         }
 
@@ -295,7 +295,7 @@ namespace CheckSumTest
 
             var ret=Program.Main(new[] { "--Check" });
 
-            Assert.AreEqual(1, ret);
+            Assert.AreEqual(0, ret);
 
         }
 
@@ -316,7 +316,7 @@ namespace CheckSumTest
 
             var ret = Program.Main(new[] { "--Check","-v","Verbose" });
 
-            Assert.AreEqual(0, ret);
+            Assert.AreEqual(2, ret);
 
         }
 
