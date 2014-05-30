@@ -5,6 +5,21 @@ namespace CheckSum.Helpers
 {
     public static class Logger
     {
+        static bool IsRedirected { get; set; }
+
+
+        static Logger()
+        {
+            try
+            {
+                IsRedirected = Console.CursorVisible && false;
+            }
+            catch
+            {
+                IsRedirected = true;
+            }
+        }
+
         public static void Error(string format, params object[] args)
         {
             Console.ForegroundColor=ConsoleColor.Red;
@@ -53,23 +68,30 @@ namespace CheckSum.Helpers
 
         internal static void Progress(string progressMessage, ref int? lineIndex)
         {
-            int currentLineIndex = Console.CursorTop;
-            int currentColIndex = Console.CursorLeft;
-            bool flag = lineIndex.HasValue;
-            if (flag)
-                Console.CursorTop = lineIndex.Value;
+            if (!IsRedirected)
+            {
+                int currentLineIndex = Console.CursorTop;
+                int currentColIndex = Console.CursorLeft;
+                bool flag = lineIndex.HasValue;
+                if (flag)
+                    Console.CursorTop = lineIndex.Value;
+                else
+                    lineIndex = Console.CursorTop;
+
+                Console.CursorLeft = 0;
+
+                Console.Write((progressMessage + new string(' ', Console.BufferWidth)).Substring(0,
+                    Console.BufferWidth));
+
+                Console.CursorTop = currentLineIndex;
+                Console.CursorLeft = currentColIndex;
+                if (!flag)
+                    Console.WriteLine();
+            }
             else
-                lineIndex = Console.CursorTop;
-
-            Console.CursorLeft = 0;
-
-            Console.Write((progressMessage + new string(' ', Console.BufferWidth)).Substring(0,
-                Console.BufferWidth));
-
-            Console.CursorTop = currentLineIndex;
-            Console.CursorLeft = currentColIndex;
-            if (!flag)
-                Console.WriteLine();
+            {
+                Console.WriteLine(progressMessage);
+            }
 
         }
 
