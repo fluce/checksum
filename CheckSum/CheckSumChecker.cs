@@ -10,10 +10,13 @@ namespace CheckSum
         IHashBuilder ActualHashBuilder { get; set; }
         IHashBuilder ExpectedHashBuilder { get; set; }
 
-        public CheckSumChecker(IHashBuilder actualHashBuilder, IHashBuilder expectedHashBuilder)
+        IHashResultComparator Comparator { get; set; }
+
+        public CheckSumChecker(IHashBuilder actualHashBuilder, IHashBuilder expectedHashBuilder, IHashResultComparator comparator)
         {
             ActualHashBuilder = actualHashBuilder;
             ExpectedHashBuilder = expectedHashBuilder;
+            Comparator = comparator;
         }
 
         public HashResult Create(Options options)
@@ -35,31 +38,40 @@ namespace CheckSum
             var actualResult=ActualHashBuilder.BuildHash();
             var expectedResult = ExpectedHashBuilder.BuildHash();
 
+            return Comparator.Compare(actualResult,expectedResult);
+
+        }
+
+    }
+
+    public class HashResultComparator : IHashResultComparator
+    {
+        public CheckResult Compare(HashResult actualResult, HashResult expectedResult)
+        {
             var result = new CheckResult();
 
             result.GlobalCheck = actualResult.GlobalHash == expectedResult.GlobalHash;
             //result.DetailedCheck =
             var list1 = expectedResult.DetailedHashValues.Select(
-                    x => new HashValue {FileName = x.FileName, Hash = x.Hash, HashMatch = HashMatch.Missing}).ToList();
-            var list2=actualResult.DetailedHashValues.Select(
-                    x => new HashValue {FileName = x.FileName, Hash = x.Hash, HashMatch = HashMatch.Unexpected}).ToList();
+                    x => new HashValue { FileName = x.FileName, Hash = x.Hash, HashMatch = HashMatch.Missing }).ToList();
+            var list2 = actualResult.DetailedHashValues.Select(
+                    x => new HashValue { FileName = x.FileName, Hash = x.Hash, HashMatch = HashMatch.Unexpected }).ToList();
 
-            result.DetailedCheck=IEnumerableHelper.Match(list1, list2, 
+            result.DetailedCheck = IEnumerableHelper.Match(list1, list2,
                 (i1, i2) => String.Compare(i1.FileName, i2.FileName, StringComparison.Ordinal),
                 (i1, i2) =>
                     new HashValue
                     {
-                        FileName = i1.FileName.RemovePrefix(options.ResolvedPackagePath + "\\"),
+                        FileName = i1.FileName, //.RemovePrefix(options.ResolvedPackagePath + "\\"),
                         Hash = i1.Hash,
                         HashMatch = i1.Hash == i2.Hash ? HashMatch.Same : HashMatch.Different
                     },
-                i=>i)
+                i => i)
                 .ToList();
 
             return result;
+            
         }
-
     }
-
 
 }

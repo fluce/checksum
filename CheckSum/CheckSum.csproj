@@ -65,6 +65,7 @@
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Helpers\Win32File.cs" />
     <Compile Include="IHashBuilder.cs" />
+    <Compile Include="IHashResultComparator.cs" />
     <Compile Include="ListBuilder\DirectoryHelper.cs" />
     <Compile Include="Resource.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -5,7 +5,7 @@ namespace CheckSum.Helpers
 {
     public static class Logger
     {
-        static bool IsRedirected { get; set; }
+       public static bool IsRedirected { get; set; }
 
 
         static Logger()

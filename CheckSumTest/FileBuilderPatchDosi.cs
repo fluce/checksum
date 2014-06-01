@@ -25,21 +25,24 @@ namespace CheckSumTest
         public void Init()
         {
             ProgressManager.Current.ProgressUpdated += ProgressManager.RenderProgressToConsole;
+            Logger.IsRedirected = true;
+
+            currentdir = Directory.GetCurrentDirectory();
+            testdir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            testdir2 = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             options = new Options()
             {
-                PackagePath = ".",
+                PackagePath = testdir,
                 DetailedChecksumFileName = "checksum_detailed.txt",
                 GlobalChecksumFileName = "checksum.txt"
             };
 
             checkSumChecker = new CheckSumChecker(
                 new DirectoryHashBuilder(options, new ZipAndPatchListBuilder(), new CheckSumCalculator(MD5.Create)),
-                new CheckSumFileHashBuilder(options));
+                new CheckSumFileHashBuilder(options),
+                new HashResultComparator());
 
-            currentdir = Directory.GetCurrentDirectory();
-            testdir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            testdir2 = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             fullfiletreeTemplate = FD.Directory(
                 FD.Directory("bob",
@@ -164,6 +167,7 @@ namespace CheckSumTest
             var dir=fullfiletree.Clone().SetName(testdir2).CreateFromScratch();
 
             dir.SetCurrent();
+            options.PackagePath = testdir2;
 
             CalculateTestDataCheckSum();
 
@@ -206,6 +210,7 @@ namespace CheckSumTest
             var dir = fullfiletree.Clone().SetName(testdir2).CreateFromScratch();
 
             dir.SetCurrent();
+            options.PackagePath = testdir2;
 
             CalculateTestDataCheckSum();
 
@@ -235,6 +240,7 @@ namespace CheckSumTest
             var dir = fullfiletree.Clone().SetName(testdir2).CreateFromScratch();
 
             dir.SetCurrent();
+            options.PackagePath = testdir2;
 
             CalculateTestDataCheckSum();
 
@@ -309,6 +315,7 @@ namespace CheckSumTest
             var dir = fullfiletree.Clone().SetName(testdir2).CreateFromScratch();
 
             dir.SetCurrent();
+            options.PackagePath = testdir2;
 
             CalculateTestDataCheckSum();
 

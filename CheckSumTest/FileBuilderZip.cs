@@ -34,8 +34,9 @@ namespace CheckSumTest
             };
 
             checkSumChecker = new CheckSumChecker(
-                new DirectoryHashBuilder(options, new ZipAndPatchListBuilder(), new CheckSumCalculator(MD5.Create)), 
-                new CheckSumFileHashBuilder(options));
+                new DirectoryHashBuilder(options, new ZipAndPatchListBuilder(), new CheckSumCalculator(MD5.Create)),
+                new CheckSumFileHashBuilder(options),
+                new HashResultComparator());
 
             currentdir = Directory.GetCurrentDirectory();
             testdir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());

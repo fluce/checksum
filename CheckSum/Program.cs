@@ -49,7 +49,8 @@ namespace CheckSum
                         var checker = new CheckSumChecker(
                             new DirectoryHashBuilder(options, GetListBuilder(options.PackageType),
                                 GetCheckSumCalculator(options.Algorithm)),
-                            new CheckSumFileHashBuilder(options));
+                            new CheckSumFileHashBuilder(options),
+                            new HashResultComparator());
 
                         switch (options.Mode)
                         {
