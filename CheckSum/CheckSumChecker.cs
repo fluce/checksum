@@ -1,7 +1,4 @@
-using CheckSum.Helpers;
-using System;
 using System.IO;
-using System.Linq;
 
 namespace CheckSum
 {
@@ -12,29 +9,27 @@ namespace CheckSum
 
         IHashResultComparator Comparator { get; set; }
 
-        public CheckSumChecker(IHashBuilder actualHashBuilder, IHashBuilder expectedHashBuilder, IHashResultComparator comparator)
+        ICheckSumFileAccessor Accessor { get; set; }
+
+        public CheckSumChecker(IHashBuilder actualHashBuilder, IHashBuilder expectedHashBuilder, IHashResultComparator comparator, ICheckSumFileAccessor checkSumFileAccessor)
         {
             ActualHashBuilder = actualHashBuilder;
             ExpectedHashBuilder = expectedHashBuilder;
             Comparator = comparator;
+            Accessor = checkSumFileAccessor;
         }
 
-        public HashResult Create(Options options)
+        public HashResult Create()
         {
             var result=ActualHashBuilder.BuildHash();
 
-            File.WriteAllText(options.ResolvedDetailedChecksumFileName, result.DetailedHash);
-            File.WriteAllText(options.ResolvedGlobalChecksumFileName, result.GlobalHash);
+            Accessor.Write(result);
+
             return result;
         }
 
-        public CheckResult Check(Options options)
+        public CheckResult Check()
         {
-            if (!File.Exists(options.ResolvedGlobalChecksumFileName))
-                return null;
-            if (!File.Exists(options.ResolvedDetailedChecksumFileName))
-                return null;
-
             var actualResult=ActualHashBuilder.BuildHash();
             var expectedResult = ExpectedHashBuilder.BuildHash();
 
@@ -43,35 +38,4 @@ namespace CheckSum
         }
 
     }
-
-    public class HashResultComparator : IHashResultComparator
-    {
-        public CheckResult Compare(HashResult actualResult, HashResult expectedResult)
-        {
-            var result = new CheckResult();
-
-            result.GlobalCheck = actualResult.GlobalHash == expectedResult.GlobalHash;
-            //result.DetailedCheck =
-            var list1 = expectedResult.DetailedHashValues.Select(
-                    x => new HashValue { FileName = x.FileName, Hash = x.Hash, HashMatch = HashMatch.Missing }).ToList();
-            var list2 = actualResult.DetailedHashValues.Select(
-                    x => new HashValue { FileName = x.FileName, Hash = x.Hash, HashMatch = HashMatch.Unexpected }).ToList();
-
-            result.DetailedCheck = IEnumerableHelper.Match(list1, list2,
-                (i1, i2) => String.Compare(i1.FileName, i2.FileName, StringComparison.Ordinal),
-                (i1, i2) =>
-                    new HashValue
-                    {
-                        FileName = i1.FileName, //.RemovePrefix(options.ResolvedPackagePath + "\\"),
-                        Hash = i1.Hash,
-                        HashMatch = i1.Hash == i2.Hash ? HashMatch.Same : HashMatch.Different
-                    },
-                i => i)
-                .ToList();
-
-            return result;
-            
-        }
-    }
-
 }

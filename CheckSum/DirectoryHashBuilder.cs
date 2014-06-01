@@ -10,23 +10,29 @@ namespace CheckSum
 {
     public class DirectoryHashBuilder : IHashBuilder
     {
-        Options Options { get; set; }
+        ICheckSumPathProvider PathProvider { get; set; }
         IFileListBuilder FileListBuilder { get; set; }
         ICheckSumCalculator CheckSumCalculator { get; set; }
+        int? DegreeOfParallelism { get; set; }
 
-        public DirectoryHashBuilder(Options options, IFileListBuilder fileListBuilder, ICheckSumCalculator checkSumCalculator)
+        public DirectoryHashBuilder(
+            ICheckSumPathProvider pathProvider, 
+            IFileListBuilder fileListBuilder, 
+            ICheckSumCalculator checkSumCalculator,
+            int? degreeOfParallelism)
         {
-            Options = options;
+            PathProvider = pathProvider;
             FileListBuilder = fileListBuilder;
             CheckSumCalculator = checkSumCalculator;
+            DegreeOfParallelism = degreeOfParallelism;
         }
 
         public HashResult BuildHash()
         {
             ProgressManager.Current["GLOBAL"].SetProgress(1, 3).SetMessage("Building file list");
             var list = FileListBuilder
-                .BuildFileList(Options.ResolvedPackagePath)
-                .Where(x => x != Options.ResolvedDetailedChecksumFileName && x != Options.ResolvedGlobalChecksumFileName)
+                .BuildFileList(PathProvider.PackagePath)
+                .Where(x => x != PathProvider.DetailedChecksumFileName && x != PathProvider.GlobalChecksumFileName)
                 .Select(x =>
                 {
                     ProgressManager.Current["FILELIST"].IncrementProgress();
@@ -41,13 +47,13 @@ namespace CheckSum
                 })
                 .AsParallel()
                 .WithMergeOptions(ParallelMergeOptions.NotBuffered)
-                .WithDegreeOfParallelism(Options.DegreeOfParallelism.GetValueOrDefault(Environment.ProcessorCount))
+                .WithDegreeOfParallelism(DegreeOfParallelism.GetValueOrDefault(Environment.ProcessorCount))
                 .Select(x =>
                 {
                     ProgressManager.Current["GLOBAL"].SetProgress(2, 3).SetMessage("Calculating hashes");
                     var r = new HashValue
                     {
-                        FileName = x.FileName.RemovePrefix(Options.ResolvedPackagePath + "\\"),
+                        FileName = x.FileName.RemovePrefix(PathProvider.PackagePath + "\\"),
                         FileLength = x.Length
                     };
                     ProgressManager.Current["HASH"].SetMessage(r.FileName);

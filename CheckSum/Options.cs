@@ -26,7 +26,7 @@ namespace CheckSum
         FullDirectory
     }
 
-    public class Options
+    public class Options : ICheckSumPathProvider
     {
         [Option('m', "Mode", HelpText = "Run mode (Create,Check, Clear)", DefaultValue = RunMode.Check, MutuallyExclusiveSet = "mode")]
         public RunMode Mode { get; set; }
@@ -92,22 +92,22 @@ namespace CheckSum
             return help;
         }
 
-        public string ResolvedDetailedChecksumFileName
+        string ICheckSumPathProvider.DetailedChecksumFileName
         {
             get
             {
                 if (!ChecksumInCurrentDirectory)
-                    return Path.Combine(ResolvedPackagePath, DetailedChecksumFileName);
+                    return Path.Combine(((ICheckSumPathProvider)this).PackagePath, DetailedChecksumFileName);
                 return DetailedChecksumFileName;
             }
         }
 
-        public string ResolvedGlobalChecksumFileName
+        string ICheckSumPathProvider.GlobalChecksumFileName
         {
             get
             {
                 if (!ChecksumInCurrentDirectory)
-                    return Path.Combine(ResolvedPackagePath, GlobalChecksumFileName);
+                    return Path.Combine(((ICheckSumPathProvider)this).PackagePath, GlobalChecksumFileName);
                 return GlobalChecksumFileName;
             }
         }
@@ -115,7 +115,7 @@ namespace CheckSum
         private string _resolvedPackagePath;
         private string _packagePath;
 
-        public string ResolvedPackagePath
+        string ICheckSumPathProvider.PackagePath
         {
             get
             {

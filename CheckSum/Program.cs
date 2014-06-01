@@ -42,15 +42,18 @@ namespace CheckSum
                             ProgressManager.Current.ProgressUpdated += ProgressManager.RenderProgressToConsole;
                         if (!Directory.Exists(options.PackagePath))
                         {
-                            Logger.Error("Package path not found ({0})", options.ResolvedPackagePath);
+                            Logger.Error("Package path not found ({0})", options.PackagePath);
                             return Return.Error;
                         }
 
+                        var csfhb = new CheckSumFileHashBuilder(options);
                         var checker = new CheckSumChecker(
                             new DirectoryHashBuilder(options, GetListBuilder(options.PackageType),
-                                GetCheckSumCalculator(options.Algorithm)),
-                            new CheckSumFileHashBuilder(options),
-                            new HashResultComparator());
+                                GetCheckSumCalculator(options.Algorithm),
+                                options.DegreeOfParallelism),
+                            csfhb,
+                            new HashResultComparator(),
+                            csfhb);
 
                         switch (options.Mode)
                         {
@@ -59,8 +62,7 @@ namespace CheckSum
                             case RunMode.Check:
                                 return CheckCheckSum(checker, options);
                             case RunMode.Clear:
-                                File.Delete(options.ResolvedDetailedChecksumFileName);
-                                File.Delete(options.ResolvedGlobalChecksumFileName);
+                                csfhb.Clear();
                                 return Return.Success;
                         }
                     }
@@ -80,7 +82,7 @@ namespace CheckSum
 
         private static int CheckCheckSum(CheckSumChecker checker, Options options)
         {
-            var chres = checker.Check(options);
+            var chres = checker.Check();
             if (chres == null)
             {
                 Logger.Error(Resource.Error_Missing_checksum_files);
@@ -134,7 +136,7 @@ namespace CheckSum
 
         private static int CreateCheckSum(CheckSumChecker checker, Options options)
         {
-            var crres = checker.Create(options);
+            var crres = checker.Create();
             if (options.Verbosity > Verbosity.Silent)
                 Logger.Info(Resource.Checksum_files_created,
                     crres.DetailedHashValues.Count);

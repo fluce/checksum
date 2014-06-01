@@ -38,11 +38,12 @@ namespace CheckSumTest
                 GlobalChecksumFileName = "checksum.txt"
             };
 
+            var checkSumFileHashBuilder = new CheckSumFileHashBuilder(options);
             checkSumChecker = new CheckSumChecker(
-                new DirectoryHashBuilder(options, new ZipAndPatchListBuilder(), new CheckSumCalculator(MD5.Create)),
-                new CheckSumFileHashBuilder(options),
-                new HashResultComparator());
-
+                new DirectoryHashBuilder(options, new ZipAndPatchListBuilder(), new CheckSumCalculator(MD5.Create), options.DegreeOfParallelism),
+                checkSumFileHashBuilder,
+                new HashResultComparator(),
+                checkSumFileHashBuilder);
 
             fullfiletreeTemplate = FD.Directory(
                 FD.Directory("bob",
