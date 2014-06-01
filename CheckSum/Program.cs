@@ -46,8 +46,11 @@ namespace CheckSum
                             return Return.Error;
                         }
 
-                        var checker = new CheckSumChecker(GetListBuilder(options.PackageType),
-                            GetCheckSumCalculator(options.Algorithm));
+                        var checker = new CheckSumChecker(
+                            new DirectoryHashBuilder(options, GetListBuilder(options.PackageType),
+                                GetCheckSumCalculator(options.Algorithm)),
+                            new CheckSumFileHashBuilder(options));
+
                         switch (options.Mode)
                         {
                             case RunMode.Create:
@@ -100,22 +103,22 @@ namespace CheckSum
             {
                 foreach (var detailedHashValue in chres.DetailedCheck)
                 {
-                    if ((detailedHashValue.HashMatch == CheckSumChecker.HashMatch.Same
+                    if ((detailedHashValue.HashMatch == HashMatch.Same
                          && options.Verbosity == Verbosity.Verbose)
-                        || detailedHashValue.HashMatch != CheckSumChecker.HashMatch.Same)
+                        || detailedHashValue.HashMatch != HashMatch.Same)
                     {
                         switch (detailedHashValue.HashMatch)
                         {
-                            case CheckSumChecker.HashMatch.Same:
+                            case HashMatch.Same:
                                 Logger.ResultSuccess(string.Format(" {0}: ", detailedHashValue.FileName), "{0}",
                                     detailedHashValue.HashMatch);
                                 break;
-                            case CheckSumChecker.HashMatch.Unexpected:
+                            case HashMatch.Unexpected:
                                 Logger.ResultWarning(string.Format(" {0}: ", detailedHashValue.FileName), "{0}",
                                     detailedHashValue.HashMatch);
                                 break;
-                            case CheckSumChecker.HashMatch.Missing:
-                            case CheckSumChecker.HashMatch.Different:
+                            case HashMatch.Missing:
+                            case HashMatch.Different:
                                 Logger.ResultFailure(string.Format(" {0}: ", detailedHashValue.FileName), "{0}",
                                     detailedHashValue.HashMatch);
                                 break;

@@ -47,17 +47,24 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckResult.cs" />
     <Compile Include="CheckSumChecker.cs" />
+    <Compile Include="CheckSumFileHashBuilder.cs" />
     <Compile Include="CheckSum\CheckSumCalculator.cs" />
     <Compile Include="CheckSum\CheckSumCalculatorExtension.cs" />
     <Compile Include="CheckSum\ICheckSumCalculator.cs" />
+    <Compile Include="DirectoryHashBuilder.cs" />
+    <Compile Include="HashResult.cs" />
+    <Compile Include="HashValue.cs" />
     <Compile Include="Helpers\IEnumerableHelper.cs" />
     <Compile Include="Helpers\StreamWithProgress.cs" />
     <Compile Include="Helpers\Logger.cs" />
     <Compile Include="Helpers\ModuleInitializer.cs" />
     <Compile Include="Helpers\ProgressItem.cs" />
     <Compile Include="Helpers\ProgressManager.cs" />
+    <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Helpers\Win32File.cs" />
+    <Compile Include="IHashBuilder.cs" />
     <Compile Include="ListBuilder\DirectoryHelper.cs" />
     <Compile Include="Resource.Designer.cs">
       <AutoGen>True</AutoGen>

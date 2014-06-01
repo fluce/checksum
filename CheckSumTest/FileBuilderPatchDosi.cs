@@ -25,13 +25,17 @@ namespace CheckSumTest
         public void Init()
         {
             ProgressManager.Current.ProgressUpdated += ProgressManager.RenderProgressToConsole;
-            checkSumChecker = new CheckSumChecker(new ZipAndPatchListBuilder(), new CheckSumCalculator(MD5.Create));
+
             options = new Options()
             {
                 PackagePath = ".",
                 DetailedChecksumFileName = "checksum_detailed.txt",
                 GlobalChecksumFileName = "checksum.txt"
             };
+
+            checkSumChecker = new CheckSumChecker(
+                new DirectoryHashBuilder(options, new ZipAndPatchListBuilder(), new CheckSumCalculator(MD5.Create)),
+                new CheckSumFileHashBuilder(options));
 
             currentdir = Directory.GetCurrentDirectory();
             testdir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -150,7 +154,7 @@ namespace CheckSumTest
 
             Assert.IsNotNull(results);
             Assert.IsTrue(results.GlobalCheck);
-            Assert.IsTrue(results.DetailedCheck.All(x=>x.HashMatch==CheckSumChecker.HashMatch.Same));
+            Assert.IsTrue(results.DetailedCheck.All(x=>x.HashMatch==HashMatch.Same));
 
         }
 
@@ -178,8 +182,8 @@ namespace CheckSumTest
 
             Assert.IsNotNull(results);
             Assert.IsFalse(results.GlobalCheck);
-            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName != "patch_dosi\\a").All(x => x.HashMatch == CheckSumChecker.HashMatch.Same));
-            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName == "patch_dosi\\a").All(x => x.HashMatch == CheckSumChecker.HashMatch.Missing));
+            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName != "patch_dosi\\a").All(x => x.HashMatch == HashMatch.Same));
+            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName == "patch_dosi\\a").All(x => x.HashMatch == HashMatch.Missing));
 
         }
 
@@ -220,8 +224,8 @@ namespace CheckSumTest
 
             Assert.IsNotNull(results);
             Assert.IsFalse(results.GlobalCheck);
-            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName != "patch_dosi\\c").All(x => x.HashMatch == CheckSumChecker.HashMatch.Same));
-            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName == "patch_dosi\\c").All(x => x.HashMatch == CheckSumChecker.HashMatch.Unexpected));
+            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName != "patch_dosi\\c").All(x => x.HashMatch == HashMatch.Same));
+            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName == "patch_dosi\\c").All(x => x.HashMatch == HashMatch.Unexpected));
 
         }
 
@@ -249,8 +253,8 @@ namespace CheckSumTest
 
             Assert.IsNotNull(results);
             Assert.IsFalse(results.GlobalCheck);
-            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName != "patch_dosi\\subdir1\\a").All(x => x.HashMatch == CheckSumChecker.HashMatch.Same));
-            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName == "patch_dosi\\subdir1\\a").All(x => x.HashMatch == CheckSumChecker.HashMatch.Different));
+            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName != "patch_dosi\\subdir1\\a").All(x => x.HashMatch == HashMatch.Same));
+            Assert.IsTrue(results.DetailedCheck.Where(x => x.FileName == "patch_dosi\\subdir1\\a").All(x => x.HashMatch == HashMatch.Different));
 
         }
 
