@@ -133,7 +133,7 @@ namespace CheckSumTest
         {
             fullfiletree.SetCurrent();
 
-            checkSumChecker.Create(options);
+            checkSumChecker.Create();
 
             Console.Out.WriteLine("checksum_detailed :");
             Console.Out.WriteLine(File.ReadAllText(options.DetailedChecksumFileName));
@@ -154,7 +154,7 @@ namespace CheckSumTest
 
             CalculateTestDataCheckSum();
 
-            var results = checkSumChecker.Check(options);
+            var results = checkSumChecker.Check();
 
             Assert.IsNotNull(results);
             Assert.IsTrue(results.GlobalCheck);
@@ -178,7 +178,7 @@ namespace CheckSumTest
 
             dir.Create();
             
-            var results = checkSumChecker.Check(options);
+            var results = checkSumChecker.Check();
 
             foreach (var hashValue in results.DetailedCheck)
             {
@@ -194,7 +194,7 @@ namespace CheckSumTest
 
         private void CalculateTestDataCheckSum()
         {
-            checkSumChecker.Create(options);
+            checkSumChecker.Create();
 
             Console.Out.WriteLine("checksum_detailed :");
             Console.Out.WriteLine(File.ReadAllText(options.DetailedChecksumFileName));
@@ -221,7 +221,7 @@ namespace CheckSumTest
 
             dir.Create();
 
-            var results = checkSumChecker.Check(options);
+            var results = checkSumChecker.Check();
 
             foreach (var hashValue in results.DetailedCheck)
             {
@@ -251,7 +251,7 @@ namespace CheckSumTest
 
             dir.Create();
 
-            var results = checkSumChecker.Check(options);
+            var results = checkSumChecker.Check();
 
             foreach (var hashValue in results.DetailedCheck)
             {
